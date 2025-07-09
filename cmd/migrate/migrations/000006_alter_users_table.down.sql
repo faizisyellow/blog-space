@@ -1,0 +1,2 @@
+ALTER TABLE blogs
+DROP FOREIGN KEY ib_fk_2; 

@@ -1,0 +1,9 @@
+CREATE TABLE users(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(32) NOT NULL,
+    first_name VARCHAR(32) NOT NULL,
+    email VARCHAR(32) NOT NULL UNIQUE,
+    password VARBINARY(72) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT 0,
+    last_name VARCHAR(32)
+);

@@ -1,0 +1,2 @@
+ALTER TABLE blogs
+ADD CONSTRAINT ib_fk_2 FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL; 
