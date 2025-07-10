@@ -22,7 +22,7 @@ type Users interface {
 type Invitations interface {
 	Create(ctx context.Context, tx *sql.Tx, ivt Invitation) error
 
-	GetByUserId(ctx context.Context, tx *sql.Tx, usrId int) (id int, err error)
+	GetByUserId(ctx context.Context, tx *sql.Tx, token string) (id int, err error)
 
 	DeleteByUserId(ctx context.Context, tx *sql.Tx, usrId int) error
 }
@@ -34,7 +34,7 @@ type Repository struct {
 }
 
 var (
-	QueryTimeout   = time.Second * 5
+	QueryTimeout   = time.Second * 30
 	ErrNotAffected = errors.New("errors rows not affected")
 )
 

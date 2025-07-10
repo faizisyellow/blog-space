@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -10,8 +11,10 @@ import (
 	"syscall"
 	"time"
 
+	"faissal.com/blogSpace/internal/services"
 	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi/v5"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type Application struct {
@@ -19,6 +22,7 @@ type Application struct {
 	Host     string
 	Env      string
 	DbConfig DBConf
+	Services services.Services
 }
 
 type DBConf struct {
@@ -34,8 +38,21 @@ func (app *Application) Mux() http.Handler {
 
 	r.Route("/v1", func(r chi.Router) {
 
-		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("pong"))
+		r.Get("/ping", app.PingHandler)
+
+		r.Get("/swagger/*", httpSwagger.Handler(
+			httpSwagger.URL(
+				// TODO: config the url in app dependencies
+				fmt.Sprintf("http://%v/v%v/swagger/doc.json", net.JoinHostPort(os.Getenv("HOST"), os.Getenv("PORT")), 1))))
+
+		r.Route("/authentication", func(r chi.Router) {
+
+			r.Post("/sign-up", app.SignUpHandler)
+
+			r.Post("/activation/{token}", app.ActivateAccountHandler)
+
+			r.Post("/sign-in", app.SignInHandler)
+
 		})
 
 	})

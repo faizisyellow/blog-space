@@ -54,7 +54,7 @@ func (hp *HashedPassword) Compare(pass string) error {
 func (ur *UsersRepository) Create(ctx context.Context, tx *sql.Tx, usr User) (usrId int, err error) {
 
 	query := `INSERT INTO users(username,first_name,last_name,email,password)
-	VALUES(?,?,?,?)
+	VALUES(?,?,?,?,?)
 	`
 
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeout)
@@ -75,7 +75,7 @@ func (ur *UsersRepository) Create(ctx context.Context, tx *sql.Tx, usr User) (us
 
 func (ur *UsersRepository) GetById(ctx context.Context, usrId int) (*User, error) {
 
-	query := `SELECT id,username,first_name,last_name,email,is_active FROM users WHERE id = ?`
+	query := `SELECT id,username,first_name,last_name,email,is_active,password FROM users WHERE id = ?`
 
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeout)
 	defer cancel()
@@ -89,6 +89,7 @@ func (ur *UsersRepository) GetById(ctx context.Context, usrId int) (*User, error
 		&user.LastName,
 		&user.Email,
 		&user.IsActive,
+		&user.Password.Hashed,
 	)
 
 	if err != nil {
@@ -100,7 +101,6 @@ func (ur *UsersRepository) GetById(ctx context.Context, usrId int) (*User, error
 
 func (ur *UsersRepository) GetByEmail(ctx context.Context, usrEmail string) (*User, error) {
 
-	// return with password column
 	query := `SELECT id,username,first_name,last_name,email,password,is_active FROM users WHERE email = ?`
 
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeout)
@@ -133,7 +133,7 @@ func (ur *UsersRepository) Update(ctx context.Context, tx *sql.Tx, usrId int, us
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeout)
 	defer cancel()
 
-	res, err := tx.ExecContext(ctx, query, &usr.Username, &usr.FirstName, &usr.LastName, &usr.Email, &usr.Password.Hashed, usrId)
+	res, err := tx.ExecContext(ctx, query, &usr.Username, &usr.FirstName, &usr.LastName, &usr.Email, &usr.Password.Hashed, &usr.IsActive, usrId)
 	if err != nil {
 		return err
 	}
@@ -143,6 +143,7 @@ func (ur *UsersRepository) Update(ctx context.Context, tx *sql.Tx, usrId int, us
 		return err
 	}
 
+	// TODO: refactor https://pkg.go.dev/database/sql#Conn.ExecContext
 	if afct == 0 {
 		return ErrNotAffected
 	}

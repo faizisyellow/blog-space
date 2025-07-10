@@ -9,6 +9,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+type TransFnc func(db *sql.DB, ctx context.Context, fnc func(*sql.Tx) error) error
+
 func New(addr string, maxOpenConn, maxIdleConn int, maxIdleTime string) (*sql.DB, error) {
 
 	db, err := sql.Open("mysql", addr)

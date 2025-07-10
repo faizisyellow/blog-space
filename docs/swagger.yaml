@@ -1,0 +1,261 @@
+basePath: /v1
+definitions:
+  main.Envelope:
+    properties:
+      data: {}
+      error: {}
+    type: object
+  services.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  services.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  services.RegisterRequest:
+    properties:
+      email:
+        maxLength: 32
+        minLength: 6
+        type: string
+      first_name:
+        maxLength: 16
+        minLength: 3
+        type: string
+      last_name:
+        maxLength: 32
+        type: string
+      password:
+        maxLength: 18
+        type: string
+      username:
+        maxLength: 16
+        minLength: 3
+        type: string
+    required:
+    - email
+    - first_name
+    - password
+    - username
+    type: object
+  services.RegisterResponse:
+    properties:
+      token:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Rest API Documentation for Blog Space Services.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Blog Space Rest API
+  version: "1.0"
+paths:
+  /authentication/activation/{token}:
+    post:
+      consumes:
+      - application/json
+      description: Activate  New Account
+      parameters:
+      - description: Token Inivitation to Activate Account
+        in: path
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: string
+                error:
+                  type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+      summary: Activate Account
+      tags:
+      - Auth
+  /authentication/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: Sign in  New Account
+      parameters:
+      - description: Payload to Sign in Account
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/services.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/services.LoginResponse'
+                error:
+                  type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+      summary: Sign in Account
+      tags:
+      - Auth
+  /authentication/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: Sign Up New Account
+      parameters:
+      - description: Payload to Sign Up
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/services.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/services.RegisterResponse'
+                error:
+                  type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+        "409":
+          description: Conflict
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+      summary: Sign Up Account
+      tags:
+      - Auth
+schemes:
+- http
+- https
+securityDefinitions:
+  JWT:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

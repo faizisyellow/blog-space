@@ -18,7 +18,7 @@ type InvitationsRepository struct {
 
 func (ir *InvitationsRepository) Create(ctx context.Context, tx *sql.Tx, ivt Invitation) error {
 
-	query := `INSERT INTO invitations(user_id,token,expired_at)
+	query := `INSERT INTO invitations(user_id,token,expire_at)
 	VALUES(?,?,?)
 	`
 
@@ -33,16 +33,19 @@ func (ir *InvitationsRepository) Create(ctx context.Context, tx *sql.Tx, ivt Inv
 	return nil
 }
 
-func (ir *InvitationsRepository) GetByUserId(ctx context.Context, tx *sql.Tx, usrId int) (id int, err error) {
+func (ir *InvitationsRepository) GetByUserId(ctx context.Context, tx *sql.Tx, token string) (id int, err error) {
 
-	query := `SELECT user_id FROM invitations WHERE user_id = ? AND expire_at > ?`
+	// query := `SELECT user_id FROM invitations WHERE token = "0fc3ef081ea829c30401c17df1f204e5c780ffc3fe25fef0ecb8553f0d3eb6bb";`
+	query := `SELECT user_id FROM invitations WHERE token = ? AND expire_at > ?;`
 
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeout)
 	defer cancel()
 
 	userId := 0
 
-	err = tx.QueryRowContext(ctx, query, usrId, time.Now()).Scan(&userId)
+	row := tx.QueryRowContext(ctx, query, token, time.Now())
+	err = row.Scan(&userId)
+
 	if err != nil {
 		return 0, err
 	}
