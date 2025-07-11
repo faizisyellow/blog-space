@@ -20,10 +20,24 @@ type Services struct {
 
 		GetUseById(ctx context.Context, usrid int) (repository.User, error)
 	}
+
+	Categories interface {
+		CreateNewCategory(ctx context.Context, req CategoryRequest) error
+
+		GetCategory(ctx context.Context, id int) (repository.Category, error)
+
+		GetCategories(ctx context.Context) ([]*repository.Category, error)
+
+		UpdateCategory(ctx context.Context, extCat repository.Category, req UpdateCategoryRequest) error
+
+		DeleteCategory(ctx context.Context, catId int) error
+	}
 }
 
 func NewServices(store repository.Repository, txfnc db.TransFnc, Db *sql.DB) *Services {
 	return &Services{
 		Users: &UsersServices{Repo: store, TransFnc: txfnc, Db: Db},
+
+		Categories: &CategorisServices{Repo: store},
 	}
 }

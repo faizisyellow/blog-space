@@ -79,7 +79,7 @@ func (us *UsersServices) RegisterAccount(ctx context.Context, req RegisterReques
 		usrId, err := us.Repo.Users.Create(ctx, tx, newAccount)
 		if err != nil {
 
-			if strings.Contains(err.Error(), "1062") {
+			if strings.Contains(err.Error(), repository.DUPLICATE_CODE) {
 				return ErrUserAlreadyExist
 			}
 

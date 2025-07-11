@@ -27,11 +27,27 @@ type Invitations interface {
 	DeleteByUserId(ctx context.Context, tx *sql.Tx, usrId int) error
 }
 
+type Categories interface {
+	Create(ctx context.Context, nwCat Category) error
+
+	GetById(ctx context.Context, catId int) (Category, error)
+
+	GetAll(ctx context.Context) ([]*Category, error)
+
+	Update(ctx context.Context, cat Category) error
+
+	Delete(ctx context.Context, catId int) error
+}
+
 type Repository struct {
 	Users Users
 
 	Invitations Invitations
+
+	Categories Categories
 }
+
+const DUPLICATE_CODE = "1062"
 
 var (
 	QueryTimeout   = time.Second * 5
@@ -41,7 +57,10 @@ var (
 func NewRepostory(db *sql.DB) *Repository {
 
 	return &Repository{
-		Users:       &UsersRepository{Db: db},
+		Users: &UsersRepository{Db: db},
+
 		Invitations: &InvitationsRepository{Db: db},
+
+		Categories: &CategoriesRepository{Db: db},
 	}
 }

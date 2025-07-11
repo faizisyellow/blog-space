@@ -50,17 +50,31 @@ func (app *Application) Mux() http.Handler {
 
 	r.Route("/v1", func(r chi.Router) {
 
+		r.Route("/", func(r chi.Router) {
+			r.Use(app.AuthMiddleware)
+
+			// Users Resource
+			r.Get("/users/profile", app.GetUserProfileHandler)
+
+			r.Delete("/users/delete", app.DeleteUserAccountHandler)
+
+			// Categories Resource
+			r.Post("/categories", app.CreateCategoryHandler)
+
+			r.Get("/categories/{ID}", app.GetCategoryMiddleware(app.GetCategoryByIdHandler))
+
+			r.Patch("/categories/{ID}", app.GetCategoryMiddleware(app.UpdateCategoryHandler))
+
+			r.Delete("/categories/{ID}", app.GetCategoryMiddleware(app.DeleteCategoryHandler))
+		})
+
+		// Public Routes
 		r.Get("/ping", app.PingHandler)
 
 		r.Get("/swagger/*", httpSwagger.Handler(
 			httpSwagger.URL(app.SwaggerUrl)))
 
-		r.Route("/", func(r chi.Router) {
-			r.Use(app.AuthMiddleware)
-
-			r.Get("/users/profile", app.GetUserProfileHandler)
-			r.Delete("/users/delete", app.DeleteUserAccountHandler)
-		})
+		r.Get("/categories", app.GetCategoriesHandler)
 
 		r.Route("/authentication", func(r chi.Router) {
 
