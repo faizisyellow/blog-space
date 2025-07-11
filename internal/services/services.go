@@ -17,6 +17,8 @@ type Services struct {
 		Login(ctx context.Context, req LoginRequest) (*repository.User, error)
 
 		DeleteAccount(ctx context.Context, usrid int) error
+
+		GetUseById(ctx context.Context, usrid int) (repository.User, error)
 	}
 }
 

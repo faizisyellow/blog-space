@@ -99,7 +99,7 @@ func (app *Application) ActivateAccountHandler(w http.ResponseWriter, r *http.Re
 // @Tags			Auth
 // @Accept			json
 // @Produce		json
-// @Param			payload	body		services.LoginRequest	true	"Payload to Sign in Account"
+// @Param			payload	body		services.LoginRequest	true	"Token to Sign in 	Account"
 // @Success		200		{object}	main.Envelope{data=services.LoginResponse,error=nil}
 // @Failure		400		{object}	main.Envelope{data=nil,error=string}
 // @Failure		404		{object}	main.Envelope{data=nil,error=string}
@@ -139,22 +139,21 @@ func (app *Application) SignInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Generate jwt token
-	_ = jwt.MapClaims{
-		// TODO: refactor hardcoded value
-		"iss": "authentication",
-		"sub": "user",
-		"exp": "3days",
+	claims := jwt.MapClaims{
+		"iss": app.JwtAuth.Iss,
+		"sub": app.JwtAuth.Sub,
+		"exp": app.JwtAuth.Exp,
 		"id":  user.Id,
 	}
 
-	// TODO: change data with correct data
-	if err := app.JsonSuccessReponse(w, r, services.LoginResponse{Token: "john doe"}, http.StatusOK); err != nil {
+	token, err := app.Authentication.GenerateToken(claims)
+	if err != nil {
 		app.InternalServerErrorResponse(w, r, err)
 		return
 	}
-}
 
-func (app *Application) DeleteAccountHandler(w http.ResponseWriter, r *http.Request) {
-
+	if err := app.JsonSuccessReponse(w, r, services.LoginResponse{Token: token}, http.StatusOK); err != nil {
+		app.InternalServerErrorResponse(w, r, err)
+		return
+	}
 }

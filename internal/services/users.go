@@ -180,3 +180,19 @@ func (us *UsersServices) DeleteAccount(ctx context.Context, usrid int) error {
 	})
 
 }
+
+func (us *UsersServices) GetUseById(ctx context.Context, usrid int) (repository.User, error) {
+
+	user, err := us.Repo.Users.GetById(ctx, usrid)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return repository.User{}, ErrUserNotFound
+		default:
+			return repository.User{}, err
+		}
+
+	}
+
+	return *user, nil
+}

@@ -34,7 +34,7 @@ type Repository struct {
 }
 
 var (
-	QueryTimeout   = time.Second * 30
+	QueryTimeout   = time.Second * 5
 	ErrNotAffected = errors.New("errors rows not affected")
 )
 

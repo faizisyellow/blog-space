@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -11,25 +10,38 @@ import (
 	"syscall"
 	"time"
 
+	"faissal.com/blogSpace/internal/auth"
 	"faissal.com/blogSpace/internal/services"
 	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi/v5"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
-type Application struct {
-	Port     string
-	Host     string
-	Env      string
-	DbConfig DBConf
-	Services services.Services
-}
-
 type DBConf struct {
 	Addr        string
 	MaxOpenConn int
 	MaxIdleConn int
 	MaxIdleTime string
+}
+
+type JwtConfig struct {
+	SecretKey string
+	Iss       string
+	Sub       string
+
+	// Unix time
+	Exp int64
+}
+
+type Application struct {
+	Port           string
+	Host           string
+	Env            string
+	DbConfig       DBConf
+	Services       services.Services
+	JwtAuth        JwtConfig
+	SwaggerUrl     string
+	Authentication auth.Authenticator
 }
 
 func (app *Application) Mux() http.Handler {
@@ -41,9 +53,14 @@ func (app *Application) Mux() http.Handler {
 		r.Get("/ping", app.PingHandler)
 
 		r.Get("/swagger/*", httpSwagger.Handler(
-			httpSwagger.URL(
-				// TODO: config the url in app dependencies
-				fmt.Sprintf("http://%v/v%v/swagger/doc.json", net.JoinHostPort(os.Getenv("HOST"), os.Getenv("PORT")), 1))))
+			httpSwagger.URL(app.SwaggerUrl)))
+
+		r.Route("/", func(r chi.Router) {
+			r.Use(app.AuthMiddleware)
+
+			r.Get("/users/profile", app.GetUserProfileHandler)
+			r.Delete("/users/delete", app.DeleteUserAccountHandler)
+		})
 
 		r.Route("/authentication", func(r chi.Router) {
 

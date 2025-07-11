@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -138,14 +139,17 @@ func (ur *UsersRepository) Update(ctx context.Context, tx *sql.Tx, usrId int, us
 		return err
 	}
 
-	afct, err := res.RowsAffected()
+	rows, err := res.RowsAffected()
 	if err != nil {
 		return err
 	}
 
-	// TODO: refactor https://pkg.go.dev/database/sql#Conn.ExecContext
-	if afct == 0 {
+	if rows == 0 {
 		return ErrNotAffected
+	}
+
+	if rows > 1 {
+		return fmt.Errorf("expected single row affected but, got %d affected", rows)
 	}
 
 	return nil
@@ -163,13 +167,17 @@ func (ur *UsersRepository) Delete(ctx context.Context, tx *sql.Tx, usrId int) er
 		return err
 	}
 
-	afct, err := res.RowsAffected()
+	rows, err := res.RowsAffected()
 	if err != nil {
 		return err
 	}
 
-	if afct == 0 {
+	if rows == 0 {
 		return ErrNotAffected
+	}
+
+	if rows > 1 {
+		return fmt.Errorf("expected single row affected but, got %d affected", rows)
 	}
 
 	return nil

@@ -1,9 +1,13 @@
 package main
 
 import (
+	"fmt"
+	"net"
 	"os"
+	"time"
 
 	_ "faissal.com/blogSpace/docs"
+	"faissal.com/blogSpace/internal/auth"
 	"faissal.com/blogSpace/internal/db"
 	"faissal.com/blogSpace/internal/repository"
 	"faissal.com/blogSpace/internal/services"
@@ -60,6 +64,15 @@ func main() {
 
 	services := services.NewServices(*repository, db.WithTx, dbs)
 
+	jwtTokenConfig := JwtConfig{
+		SecretKey: os.Getenv("SECRET_KEY"),
+		Iss:       "authentication",
+		Sub:       "user",
+		Exp:       time.Now().Add(time.Hour * 24 * 3).Unix(),
+	}
+
+	jwtAuthentication := auth.New(jwtTokenConfig.SecretKey, jwtTokenConfig.Iss, jwtTokenConfig.Sub)
+
 	application := Application{
 		Port: os.Getenv("PORT"),
 
@@ -70,6 +83,13 @@ func main() {
 		DbConfig: dbConfig,
 
 		Services: *services,
+
+		JwtAuth: jwtTokenConfig,
+
+		Authentication: jwtAuthentication,
+
+		//http:domain:port/version/swagger/*
+		SwaggerUrl: fmt.Sprintf("http://%v/v%v/swagger/doc.json", net.JoinHostPort(os.Getenv("HOST"), os.Getenv("PORT")), 1),
 	}
 
 	mux := application.Mux()
