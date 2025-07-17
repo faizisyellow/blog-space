@@ -36,6 +36,13 @@ definitions:
     required:
     - content
     type: object
+  services.CommentRequest:
+    properties:
+      blog_id:
+        type: integer
+      content:
+        type: string
+    type: object
   services.LoginRequest:
     properties:
       email:
@@ -287,6 +294,74 @@ paths:
       summary: Sign Up Account
       tags:
       - Auth
+  /blogs:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create New Blog
+      parameters:
+      - description: Payload To Create New Blog
+        in: formData
+        name: properties
+        required: true
+        type: string
+      - description: Image file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: string
+                error:
+                  type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+      security:
+      - JWT: []
+      summary: Create New Blog
+      tags:
+      - Blogs
   /categories:
     delete:
       consumes:
@@ -545,7 +620,7 @@ paths:
       summary: Get Category
       tags:
       - Categories
-    put:
+    patch:
       consumes:
       - application/json
       description: Update Category
@@ -635,6 +710,135 @@ paths:
       summary: Update Category
       tags:
       - Categories
+  /comments:
+    post:
+      consumes:
+      - application/json
+      description: Create New Comment By User authentication
+      parameters:
+      - description: Payload To Create Comments
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/services.CommentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: string
+                error:
+                  type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+      security:
+      - JWT: []
+      summary: Create New Comment
+      tags:
+      - Comments
+  /comments/{ID}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Comment Either By comment's author or Blog's author
+      parameters:
+      - description: Id Comment
+        in: path
+        name: ID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.Envelope'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+      security:
+      - JWT: []
+      summary: Delete Comment
+      tags:
+      - Comments
   /users/delete:
     delete:
       consumes:

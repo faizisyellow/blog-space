@@ -32,6 +32,18 @@ type Services struct {
 
 		DeleteCategory(ctx context.Context, catId int) error
 	}
+
+	Blogs interface {
+		CreateNewBlog(ctx context.Context, req BlogRequest, errCreate chan<- error)
+	}
+
+	Comments interface {
+		CreateNewComment(ctx context.Context, req CommentRequest, authorId int) error
+
+		GetCommentById(ctx context.Context, id int) (*repository.Comment, error)
+
+		DeleteComment(ctx context.Context, id int) error
+	}
 }
 
 func NewServices(store repository.Repository, txfnc db.TransFnc, Db *sql.DB) *Services {
@@ -39,5 +51,9 @@ func NewServices(store repository.Repository, txfnc db.TransFnc, Db *sql.DB) *Se
 		Users: &UsersServices{Repo: store, TransFnc: txfnc, Db: Db},
 
 		Categories: &CategorisServices{Repo: store},
+
+		Blogs: &BlogsServices{Repo: store},
+
+		Comments: &CommentsServices{Repo: store},
 	}
 }

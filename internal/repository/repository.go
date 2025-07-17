@@ -39,12 +39,36 @@ type Categories interface {
 	Delete(ctx context.Context, catId int) error
 }
 
+type Blogs interface {
+	Create(ctx context.Context, newBg Blog) error
+
+	GetById(ctx context.Context, blogId int) (*Blog, error)
+
+	GetAll(ctx context.Context) ([]*Blog, error)
+
+	Update(ctx context.Context, blgId int) error
+
+	Delete(ctx context.Context, blgId int) error
+}
+
+type Comments interface {
+	Create(ctx context.Context, newCmnt Comment) error
+
+	GetById(ctx context.Context, id int) (*Comment, error)
+
+	DeleteByUserId(ctx context.Context, id int) error
+}
+
 type Repository struct {
 	Users Users
 
 	Invitations Invitations
 
 	Categories Categories
+
+	Blogs Blogs
+
+	Comments Comments
 }
 
 const DUPLICATE_CODE = "1062"
@@ -62,5 +86,9 @@ func NewRepostory(db *sql.DB) *Repository {
 		Invitations: &InvitationsRepository{Db: db},
 
 		Categories: &CategoriesRepository{Db: db},
+
+		Blogs: &BlogsRepository{Db: db},
+
+		Comments: &CommentsRepository{Db: db},
 	}
 }

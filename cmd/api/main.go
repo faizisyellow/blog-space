@@ -11,6 +11,7 @@ import (
 	"faissal.com/blogSpace/internal/db"
 	"faissal.com/blogSpace/internal/repository"
 	"faissal.com/blogSpace/internal/services"
+	"faissal.com/blogSpace/internal/uploader"
 	"github.com/charmbracelet/log"
 	"github.com/joho/godotenv"
 )
@@ -73,6 +74,15 @@ func main() {
 
 	jwtAuthentication := auth.New(jwtTokenConfig.SecretKey, jwtTokenConfig.Iss, jwtTokenConfig.Sub)
 
+	r2conf := R2Conf{
+		BucketName:      os.Getenv("R2_BUCKET_NAME"),
+		AccountId:       os.Getenv("R2_ACCOUNT_ID"),
+		AccessKeyId:     os.Getenv("R2_ACCESS_KEY"),
+		AccessKeySecret: os.Getenv("R2_ACCESS_KEY_SECRET"),
+	}
+
+	r2Store := uploader.NewR2Client(r2conf.BucketName, r2conf.AccountId, r2conf.AccessKeyId, r2conf.AccessKeySecret)
+
 	application := Application{
 		Port: os.Getenv("PORT"),
 
@@ -90,6 +100,10 @@ func main() {
 
 		//http:domain:port/version/swagger/*
 		SwaggerUrl: fmt.Sprintf("http://%v/v%v/swagger/doc.json", net.JoinHostPort(os.Getenv("HOST"), os.Getenv("PORT")), 1),
+
+		R2Config: r2conf,
+
+		Uploading: r2Store,
 	}
 
 	mux := application.Mux()

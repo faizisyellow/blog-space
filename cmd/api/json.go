@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/go-playground/validator/v10"
@@ -15,6 +17,7 @@ type Envelope struct {
 }
 
 var Validate *validator.Validate
+var ErrNoField = errors.New("field is required")
 
 func init() {
 	Validate = validator.New(validator.WithRequiredStructEnabled())
@@ -48,6 +51,22 @@ func ReadHttpJson(w http.ResponseWriter, r *http.Request, data any) error {
 
 	return decode.Decode(data)
 
+}
+
+func ReadJsonMultiPartForm(r *http.Request, field string, data any) error {
+
+	r.ParseMultipartForm(3 * 1045 * 1045)
+
+	if len(r.MultipartForm.Value[field]) == 0 {
+		return ErrNoField
+	}
+
+	jsonField := r.MultipartForm.Value[field][0]
+
+	decoder := json.NewDecoder(strings.NewReader(jsonField))
+	decoder.DisallowUnknownFields()
+
+	return decoder.Decode(data)
 }
 
 func WriteHttpNoContent(w http.ResponseWriter) error {

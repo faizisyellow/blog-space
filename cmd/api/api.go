@@ -12,6 +12,7 @@ import (
 
 	"faissal.com/blogSpace/internal/auth"
 	"faissal.com/blogSpace/internal/services"
+	"faissal.com/blogSpace/internal/uploader"
 	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi/v5"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -33,15 +34,33 @@ type JwtConfig struct {
 	Exp int64
 }
 
+type R2Conf struct {
+	BucketName      string
+	AccountId       string
+	AccessKeyId     string
+	AccessKeySecret string
+}
+
 type Application struct {
-	Port           string
-	Host           string
-	Env            string
-	DbConfig       DBConf
-	Services       services.Services
-	JwtAuth        JwtConfig
-	SwaggerUrl     string
+	Port string
+
+	Host string
+
+	Env string
+
+	DbConfig DBConf
+
+	Services services.Services
+
+	JwtAuth JwtConfig
+
+	SwaggerUrl string
+
 	Authentication auth.Authenticator
+
+	Uploading uploader.Uploader
+
+	R2Config R2Conf
 }
 
 func (app *Application) Mux() http.Handler {
@@ -66,6 +85,13 @@ func (app *Application) Mux() http.Handler {
 			r.Patch("/categories/{ID}", app.GetCategoryMiddleware(app.UpdateCategoryHandler))
 
 			r.Delete("/categories/{ID}", app.GetCategoryMiddleware(app.DeleteCategoryHandler))
+
+			// Blogs Resource
+			r.Post("/blogs", app.CreateBlogHandler)
+
+			// Comments Resource
+			r.Post("/comments", app.CreateCommentHandler)
+			r.Delete("/comments/{ID}", app.CheckOwnerCommentMiddleware(app.DeleteCommentHandler))
 		})
 
 		// Public Routes
